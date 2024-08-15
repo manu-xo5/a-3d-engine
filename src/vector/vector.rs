@@ -1,4 +1,5 @@
 use super::super::window;
+use std::ops::{Add, Div, Sub};
 
 #[derive(Debug, Copy, Clone)]
 
@@ -23,6 +24,14 @@ impl Vector3 {
 
     pub fn scale(&self, mag: f64) -> Self {
         Vector3::new(self.x * mag, self.y * mag, self.z * mag)
+    }
+
+    pub fn cross(&self, other: &Self) -> Self {
+        let x = self.y * other.z - self.z * other.y;
+        let y = self.z * other.x - self.x * other.z;
+        let z = self.x * other.y - self.y * other.x;
+
+        Vector3::new(x, y, z)
     }
 
     pub fn translation(&self, t: &Self) -> Self {
@@ -71,14 +80,6 @@ impl Vector3 {
         ])
     }
 
-    pub fn project(&self) -> Self {
-        let zf = 1.0; //if self.z == 0.0 { 1.0 } else { 1.0 / self.z };
-        let xf = window::SCREEN_W as f64 / 2.0;
-        let yf = window::SCREEN_H as f64 / 2.0;
-
-        Vector3::new((self.x + 1.0) * xf, (self.y + 1.0) * yf, self.z)
-    }
-
     pub fn mul_matrix(&self, matrix: [[f64; 4]; 4]) -> Self {
         let x =
             self.x * matrix[0][0] + self.y * matrix[1][0] + self.z * matrix[2][0] + matrix[3][0];
@@ -103,6 +104,37 @@ impl Vector3 {
 
     pub fn to_vector2(&self) -> Vector2 {
         Vector2::new(self.x, self.y)
+    }
+}
+
+impl Add<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn add(self, rhs: f64) -> Vector3 {
+        Vector3::new(self.x + rhs, self.y + rhs, self.z + rhs)
+    }
+}
+
+impl Add for Vector3 {
+    type Output = Vector3;
+
+    fn add(self, rhs: Self) -> Vector3 {
+        Vector3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+    }
+}
+
+impl Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: Self) -> Vector3 {
+        Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+impl Div<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn div(self, rhs: f64) -> Vector3 {
+        Vector3::new(self.x / rhs, self.y / rhs, self.z / rhs)
     }
 }
 
