@@ -5,8 +5,10 @@ pub struct KeyState {
     pub s: bool,
     pub a: bool,
     pub d: bool,
+    pub h: bool,
     pub j: bool,
     pub k: bool,
+    pub l: bool,
 }
 
 pub enum KeyDirection {
@@ -22,8 +24,10 @@ impl KeyState {
             a: false,
             d: false,
 
+            h: false,
             j: false,
             k: false,
+            l: false,
         }
     }
 
@@ -44,6 +48,9 @@ impl KeyState {
             Some(Keycode::S) => self.s = value,
             Some(Keycode::A) => self.a = value,
             Some(Keycode::D) => self.d = value,
+
+            Some(Keycode::H) => self.h = value,
+            Some(Keycode::L) => self.l = value,
 
             Some(Keycode::K) => self.k = value,
             Some(Keycode::J) => self.j = value,

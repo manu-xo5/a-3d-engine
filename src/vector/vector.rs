@@ -1,5 +1,5 @@
-use super::super::window;
-use std::ops::{Add, Div, Sub};
+use super::super::matrix::{rotate_x, Matrix};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Copy, Clone)]
 
@@ -22,10 +22,6 @@ impl Vector3 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
-    pub fn scale(&self, mag: f64) -> Self {
-        Vector3::new(self.x * mag, self.y * mag, self.z * mag)
-    }
-
     pub fn cross(&self, other: &Self) -> Self {
         let x = self.y * other.z - self.z * other.y;
         let y = self.z * other.x - self.x * other.z;
@@ -35,71 +31,7 @@ impl Vector3 {
     }
 
     pub fn translation(&self, t: &Self) -> Self {
-        Vector3::new(self.x + t.x, self.y + t.y, self.z + t.z)
-        // self.mul_matrix([
-        //     [1.0, 0.0, 0.0, t.x],
-        //     [0.0, 1.0, 0.0, t.y],
-        //     [0.0, 0.0, 1.0, t.z],
-        //     [0.0, 0.0, 0.0, 1.0],
-        // ])
-    }
-
-    pub fn rotate_x(&self, angle: f64) -> Self {
-        let cos = angle.cos();
-        let sin = angle.sin();
-
-        self.mul_matrix([
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, cos, -sin, 0.0],
-            [0.0, sin, cos, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
-    }
-
-    pub fn rotate_y(&self, angle: f64) -> Self {
-        let cos = angle.cos();
-        let sin = angle.sin();
-
-        self.mul_matrix([
-            [cos, 0.0, sin, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [-sin, 0.0, cos, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
-    }
-
-    pub fn rotate_z(&self, angle: f64) -> Self {
-        let cos = angle.cos();
-        let sin = angle.sin();
-
-        self.mul_matrix([
-            [cos, -sin, 0.0, 0.0],
-            [sin, cos, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ])
-    }
-
-    pub fn mul_matrix(&self, matrix: [[f64; 4]; 4]) -> Self {
-        let x =
-            self.x * matrix[0][0] + self.y * matrix[1][0] + self.z * matrix[2][0] + matrix[3][0];
-        let y =
-            self.x * matrix[0][1] + self.y * matrix[1][1] + self.z * matrix[2][1] + matrix[3][1];
-        let z =
-            self.x * matrix[0][2] + self.y * matrix[1][2] + self.z * matrix[2][2] + matrix[3][2];
-
-        let w =
-            self.x * matrix[0][3] + self.y * matrix[1][3] + self.z * matrix[2][3] + matrix[3][3];
-
-        if w == 0.0 {
-            Vector3 { x, y, z }
-        } else {
-            Vector3 {
-                x: x / w,
-                y: y / w,
-                z: z / w,
-            }
-        }
+        *self + *t
     }
 
     pub fn to_vector2(&self) -> Vector2 {
@@ -107,11 +39,45 @@ impl Vector3 {
     }
 }
 
+impl Mul for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Self) -> Vector3 {
+        Matrix::new([
+            [rhs.x, 0.0, 0.0, 0.0],
+            [0.0, rhs.y, 0.0, 0.0],
+            [0.0, 0.0, rhs.z, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]) * self
+    }
+}
+
+impl Mul<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: f64) -> Vector3 {
+        self * Vector3::new(rhs, rhs, rhs)
+    }
+}
+
+impl Mul<Matrix<4, 4>> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, rhs: Matrix<4, 4>) -> Vector3 {
+        rhs * self
+    }
+}
+
 impl Add<f64> for Vector3 {
     type Output = Vector3;
 
     fn add(self, rhs: f64) -> Vector3 {
-        Vector3::new(self.x + rhs, self.y + rhs, self.z + rhs)
+        self * Matrix::new([
+            [1.0, 0.0, 0.0, rhs],
+            [0.0, 1.0, 0.0, rhs],
+            [0.0, 0.0, 1.0, rhs],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
     }
 }
 
@@ -119,7 +85,12 @@ impl Add for Vector3 {
     type Output = Vector3;
 
     fn add(self, rhs: Self) -> Vector3 {
-        Vector3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+        self * Matrix::new([
+            [1.0, 0.0, 0.0, rhs.x],
+            [0.0, 1.0, 0.0, rhs.y],
+            [0.0, 0.0, 1.0, rhs.z],
+            [0.0, 0.0, 0.0, 1.0],
+        ])
     }
 }
 
@@ -127,14 +98,38 @@ impl Sub for Vector3 {
     type Output = Vector3;
 
     fn sub(self, rhs: Self) -> Vector3 {
-        Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+        self.add(rhs * -1.0)
     }
 }
+impl Sub<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, rhs: f64) -> Vector3 {
+        self.add(rhs * -1.0)
+    }
+}
+
+impl Div<Vector3> for f64 {
+    type Output = Vector3;
+
+    fn div(self, rhs: Vector3) -> Vector3 {
+        Vector3::new(self / rhs.x, self / rhs.y, self / rhs.z)
+    }
+}
+
+impl Div for Vector3 {
+    type Output = Vector3;
+
+    fn div(self, rhs: Self) -> Vector3 {
+        self * (1.0 / rhs)
+    }
+}
+
 impl Div<f64> for Vector3 {
     type Output = Vector3;
 
     fn div(self, rhs: f64) -> Vector3 {
-        Vector3::new(self.x / rhs, self.y / rhs, self.z / rhs)
+        self * (1.0 / Vector3::new(rhs, rhs, rhs))
     }
 }
 
