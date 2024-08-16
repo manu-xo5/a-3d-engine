@@ -6,19 +6,30 @@ pub struct Matrix<const ROWS: usize, const COLS: usize> {
 }
 
 pub fn projection_matrix() -> Matrix<4, 4> {
-    let aspect_ratio: f64 = window::SCREEN_H as f64 / window::SCREEN_W as f64;
     let fov: f64 = 90.0;
 
-    let fov_rad: f64 = 1.0 / (fov.to_radians().tan());
+    let aspect_ratio: f64 = window::SCREEN_H as f64 / window::SCREEN_W as f64;
+    let fov_rad: f64 = 1.0 / ((fov / 2.0).to_radians().tan());
 
     let q = window::Z_FAR / (window::Z_FAR - window::Z_NEAR);
 
     return Matrix::new([
         [aspect_ratio * fov_rad, 0.0, 0.0, 0.0],
         [0.0, fov_rad, 0.0, 0.0],
-        [0.0, 0.0, q, 1.0],
-        [0.0, 0.0, -window::Z_NEAR * q, 0.0],
+        [0.0, 0.0, q, -window::Z_NEAR * q],
+        [0.0, 0.0, 1.0, 0.0],
     ]);
+}
+
+pub fn translate(factor: (f64, f64, f64)) -> Matrix<4, 4> {
+    let (x, y, z) = factor;
+
+    Matrix::new([
+        [1.0, 0.0, 0.0, x],
+        [0.0, 1.0, 0.0, y],
+        [0.0, 0.0, 1.0, z],
+        [0.0, 0.0, 0.0, 1.0],
+    ])
 }
 
 pub fn rotate_x(angle: f64) -> Matrix<4, 4> {
@@ -53,6 +64,17 @@ pub fn rotate_z(angle: f64) -> Matrix<4, 4> {
         [cos, -sin, 0.0, 0.0],
         [sin, cos, 0.0, 0.0],
         [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ])
+}
+
+pub fn scale(factor: (f64, f64, f64)) -> Matrix<4, 4> {
+    let (x, y, z) = factor;
+
+    Matrix::new([
+        [x, 0.0, 0.0, 0.0],
+        [0.0, y, 0.0, 0.0],
+        [0.0, 0.0, z, 0.0],
         [0.0, 0.0, 0.0, 1.0],
     ])
 }

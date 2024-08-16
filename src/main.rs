@@ -57,7 +57,7 @@ fn main() -> Result<(), String> {
     println!("Hello, world!");
 
     let mut camera_pos = Vector3::new(0.1, 0.1, 0.1);
-    let mut camera_angle = matrix::rotate_y(0.0);
+    let mut camera_angle = Vector3::new(0.0, 0.0, 1.0);
     let mut keystate = KeyState::new();
 
     'gameloop: loop {
@@ -78,8 +78,9 @@ fn main() -> Result<(), String> {
                     let x_rot = yrel as f64 * dt;
                     let y_rot = xrel as f64 * dt;
 
-                    // println!("{} {}", camera_angle.x, camera_angle.y);
-                    camera_angle = matrix::rotate_y(y_rot) * matrix::rotate_z(x_rot) * camera_angle
+                    println!("{} {}", camera_angle.x, camera_angle.y);
+                    camera_angle = matrix::rotate_y(y_rot) * matrix::rotate_z(x_rot) * camera_angle;
+                    println!("{} {}", camera_angle.x, camera_angle.y);
                 }
                 Event::MouseButtonDown {
                     mouse_btn: MouseButton::Left,
@@ -136,14 +137,15 @@ fn main() -> Result<(), String> {
             // obj2 = obj2.mul(&matrix::rotate_z(-0.05)); /* * matrix::rotate_z(0.0) */
         }
         if keystate.h {
-            camera_angle = matrix::rotate_y(d) * camera_angle /* * matrix::rotate_z(0.0) */
+            camera_angle = matrix::rotate_y(d) * camera_angle /* * matrix::rotate_z(0.0) */;
+            println!("{:?}", camera_angle);
         }
         if keystate.l {
             camera_angle = matrix::rotate_y(-d) * camera_angle /* * matrix::rotate_z(0.0) */
             // obj2 = obj2.mul(&matrix::rotate_z(-0.05)); /* * matrix::rotate_z(0.0) */
         }
 
-        pipeline::pump(&camera_pos, &camera_angle, vec![&obj2], &mut canvas);
+        pipeline::pump(&camera_pos, &camera_angle, vec![&obj, &obj2], &mut canvas);
 
         canvas.present();
 

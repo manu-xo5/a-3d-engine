@@ -1,5 +1,5 @@
 use super::super::matrix::{rotate_x, Matrix};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, MulAssign, Sub};
 
 #[derive(Debug, Copy, Clone)]
 
@@ -20,6 +20,11 @@ impl Vector3 {
 
     pub fn length(&self) -> f64 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    pub fn normalize(&self) -> Self {
+        let l = self.length();
+        Vector3::new(self.x / l, self.y / l, self.z / l)
     }
 
     pub fn cross(&self, other: &Self) -> Self {
@@ -43,12 +48,7 @@ impl Mul for Vector3 {
     type Output = Vector3;
 
     fn mul(self, rhs: Self) -> Vector3 {
-        Matrix::new([
-            [rhs.x, 0.0, 0.0, 0.0],
-            [0.0, rhs.y, 0.0, 0.0],
-            [0.0, 0.0, rhs.z, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]) * self
+        Vector3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 
@@ -65,6 +65,15 @@ impl Mul<Matrix<4, 4>> for Vector3 {
 
     fn mul(self, rhs: Matrix<4, 4>) -> Vector3 {
         rhs * self
+    }
+}
+
+impl MulAssign<Matrix<4, 4>> for Vector3 {
+    fn mul_assign(&mut self, rhs: Matrix<4, 4>) {
+        let vector = rhs * *self;
+        self.x = vector.x;
+        self.y = vector.y;
+        self.z = vector.z;
     }
 }
 
