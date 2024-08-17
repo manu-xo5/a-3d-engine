@@ -34,11 +34,9 @@ impl KeyState {
     pub fn handle_event(&mut self, keycode: Option<Keycode>, direction: KeyDirection) {
         let value = match direction {
             KeyDirection::KeyUp => {
-                println!("{:?} released", keycode,);
                 false
             }
             KeyDirection::KeyDown => {
-                println!("{:?} pressed", keycode,);
                 true
             }
         };

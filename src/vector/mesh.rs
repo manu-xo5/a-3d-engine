@@ -1,30 +1,14 @@
-use super::super::matrix::*;
 use super::vector::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
 
 pub struct Mesh {
     pub vertices: Vec<Vector3>,
-    pub indices: Vec<(usize, usize)>,
+    pub indices: Vec<(usize, usize, usize)>,
 }
 
 impl Mesh {
-    pub fn new(vertices: Vec<Vector3>, indices: Vec<(usize, usize)>) -> Self {
-        Mesh { vertices, indices }
-    }
-
-    pub fn mul(&self, mat: &Matrix<4, 4>) -> Mesh {
-        let mut vertices: Vec<Vector3> = vec![];
-        let mut indices: Vec<(usize, usize)> = vec![];
-
-        for v in &self.vertices {
-            vertices.push(mat * *v);
-        }
-
-        for i in &self.indices {
-            indices.push(*i)
-        }
-
+    pub fn new(vertices: Vec<Vector3>, indices: Vec<(usize, usize, usize)>) -> Self {
         Mesh { vertices, indices }
     }
 
@@ -76,13 +60,11 @@ impl Mesh {
             let faces = line
                 .split_at(2)
                 .1
-                .split("/")
+                .split(" ")
                 .map(|x| x.parse::<usize>().unwrap_or(0))
                 .collect::<Vec<usize>>();
 
-            indices.push((faces[0], faces[1]));
-            indices.push((faces[1], faces[2]));
-            indices.push((faces[2], faces[0]));
+            indices.push((faces[0] - 1, faces[1] - 1, faces[2] - 1));
         }
 
         Mesh::new(vertices, indices)
