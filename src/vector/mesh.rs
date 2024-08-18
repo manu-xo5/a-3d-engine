@@ -1,3 +1,4 @@
+use super::super::matrix;
 use super::vector::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
@@ -68,5 +69,38 @@ impl Mesh {
         }
 
         Mesh::new(vertices, indices)
+    }
+}
+
+pub fn grid_mesh() -> Mesh {
+    const CELL: f64 = 1.5;
+    const ROWS: usize = 20;
+    let vertices: Vec<Vector3> = (1..=ROWS)
+        .flat_map(|z| {
+            [
+                Vector3::new(-20.0, -0.5, z as f64 * CELL - 3.0),
+                Vector3::new(20.0, -0.5, z as f64 * CELL - 3.0),
+            ]
+        })
+        .collect();
+
+    let indices: Vec<(usize, usize, usize)> = (1..=(ROWS / 2))
+        .step_by(2)
+        .map(|i| (i, i + 1, i + 2))
+        .collect();
+
+    Mesh { vertices, indices }
+}
+
+impl std::ops::Mul<matrix::Matrix<4, 4>> for Mesh {
+    type Output = Self;
+
+    fn mul(self, rhs: matrix::Matrix<4, 4>) -> Self::Output {
+        let vertices: Vec<Vector3> = self.vertices.iter().map(|v| &rhs * *v).collect();
+
+        Mesh {
+            vertices,
+            indices: self.indices,
+        }
     }
 }

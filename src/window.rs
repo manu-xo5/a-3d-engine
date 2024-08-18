@@ -13,7 +13,11 @@ pub const Z_NEAR: f64 = 0.1;
 pub fn create_window() -> (Window, Sdl) {
     let sdl = sdl2::init().unwrap();
     let video = sdl.video().unwrap();
-    let window = video.window("A 3D ENGINE", 800, 600).build().unwrap();
+    let window = video
+        .window("A 3D ENGINE", 800, 600)
+        .fullscreen()
+        .build()
+        .unwrap();
 
     (window, sdl)
 }

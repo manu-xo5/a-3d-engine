@@ -6,10 +6,8 @@ pub struct Matrix<const ROWS: usize, const COLS: usize> {
 }
 
 pub fn projection_matrix() -> Matrix<4, 4> {
-    let fov: f64 = 90.0;
-
     let aspect_ratio: f64 = window::SCREEN_H as f64 / window::SCREEN_W as f64;
-    let fov_rad: f64 = 1.0 / ((fov / 2.0).to_radians().tan());
+    let fov_rad: f64 = 1.0 / ((window::FOV / 2.0).to_radians().tan());
 
     let q = window::Z_FAR / (window::Z_FAR - window::Z_NEAR);
 
@@ -99,10 +97,10 @@ impl std::ops::DerefMut for Matrix<4, 4> {
     }
 }
 
-impl Mul for Matrix<4, 4> {
+impl Mul<&Matrix<4, 4>> for Matrix<4, 4> {
     type Output = Matrix<4, 4>;
 
-    fn mul(self, rhs: Self) -> Self::Output {
+    fn mul(self, rhs: &Self) -> Self::Output {
         let mut res = Matrix::new([[0.0; 4]; 4]);
 
         for i in 0..4 {
@@ -114,6 +112,13 @@ impl Mul for Matrix<4, 4> {
         }
 
         res
+    }
+}
+impl Mul for Matrix<4, 4> {
+    type Output = Matrix<4, 4>;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self * &rhs
     }
 }
 
