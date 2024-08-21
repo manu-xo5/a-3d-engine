@@ -21,13 +21,15 @@ pub fn filled_rect(vector: &Vector2, length: u32, width: u32, canvas: &mut Canva
 }
 
 pub fn line(p1: &Vector2, p2: &Vector2, canvas: &mut Canvas<Window>) {
-    canvas
-        .draw_line(
-            Point::new(p1.x as i32, p1.y as i32),
-            Point::new(p2.x as i32, p2.y as i32),
-        )
-        .unwrap();
-    canvas.set_draw_color((0, 0, 0));
+    if p2.sub(p1).length().abs() < 800.0 {
+        canvas
+            .draw_line(
+                Point::new(p1.x as i32, p1.y as i32),
+                Point::new(p2.x as i32, p2.y as i32),
+            )
+            .unwrap();
+        canvas.set_draw_color((0, 0, 0));
+    }
 }
 
 pub fn triangle(p1: &Vector2, p2: &Vector2, p3: &Vector2, canvas: &mut Canvas<Window>) {
@@ -82,11 +84,16 @@ pub fn draw_flat_bottom_triangle(
 
     println!("{}, {} {}", p1.y, p2.y, p3.y);
 
-    for y_off in (p3.y as u64)..(p2.y as u64) {
-        let y_off = y_off as f64;
-        canvas.set_draw_color((100, 100, 100));
+    let range = (p3.y as i32)..(p2.y as i32);
 
-        line(&Vector2::new(x1, y_off), &Vector2::new(x2, y_off), canvas);
+    for y_off in range {
+        line(
+            &Vector2::new(x1, y_off as f64),
+            &Vector2::new(x2, y_off as f64),
+            canvas,
+        );
+
+        canvas.set_draw_color((100, 100, 100));
 
         x1 += m1;
         x2 += m2;

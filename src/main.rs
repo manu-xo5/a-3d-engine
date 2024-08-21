@@ -94,16 +94,16 @@ fn main() -> Result<(), String> {
         let d = 0.04;
         let da = 0.02;
         if keystate.w {
-            camera_pos = camera_pos.translation(&Vector3::new(0.0, 0.0, -d))
-        }
-        if keystate.s {
             camera_pos = camera_pos.translation(&Vector3::new(0.0, 0.0, d))
         }
+        if keystate.s {
+            camera_pos = camera_pos.translation(&Vector3::new(0.0, 0.0, -d))
+        }
         if keystate.a {
-            camera_pos = camera_pos.translation(&Vector3::new(d, 0.0, 0.0))
+            camera_pos = camera_pos.translation(&Vector3::new(-d, 0.0, 0.0))
         }
         if keystate.d {
-            camera_pos = camera_pos.translation(&Vector3::new(-d, 0.0, 0.0))
+            camera_pos = camera_pos.translation(&Vector3::new(d, 0.0, 0.0))
         }
 
         if keystate.j {

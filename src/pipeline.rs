@@ -20,8 +20,16 @@ pub fn transform_world_space(
 ) -> Vector3 {
     let mut vec = vec.clone();
 
-    vec *= translate((camera_position.x, camera_position.y, camera_position.z));
-    vec *= translate((0.0, -0.0, 2.0)) * camera_angle * scale((1.0, -1.0, 1.0));
+    let z_offset = 2.0;
+    vec *= scale((1.0, -1.0, 1.0));
+
+    vec *= translate((
+        -camera_position.x,
+        -camera_position.y,
+        -camera_position.z + z_offset,
+    ));
+
+    vec *= translate((0.0, 0.0, 0.0)) * camera_angle;
 
     vec
 }

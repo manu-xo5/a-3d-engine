@@ -1,5 +1,5 @@
 use crate::window;
-use std::ops::Mul;
+use std::ops::{Mul, Not};
 
 pub struct Matrix<const ROWS: usize, const COLS: usize> {
     value: [[f64; COLS]; ROWS],
@@ -151,5 +151,19 @@ impl Mul<super::vector::vector::Vector3> for Matrix<4, 4> {
             (rhs.x * self[1][0] + rhs.y * self[1][1] + rhs.z * self[1][2] + self[1][3]) / w,
             (rhs.x * self[2][0] + rhs.y * self[2][1] + rhs.z * self[2][2] + self[2][3]) / w,
         )
+    }
+}
+
+impl Not for &Matrix<4, 4> {
+    type Output = Matrix<4, 4>;
+
+    fn not(self) -> Self::Output {
+        let v = self.value;
+        Matrix::new([
+            [v[0][0], v[1][0], v[2][0], v[3][0]],
+            [v[0][1], v[1][1], v[2][1], v[3][1]],
+            [v[0][2], v[1][2], v[2][2], v[3][2]],
+            [v[0][3], v[1][3], v[2][3], v[3][3]],
+        ])
     }
 }
